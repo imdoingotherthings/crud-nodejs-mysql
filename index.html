@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Node Routes</title>
+</head>
+<body>
+    <h2>Submit</h2>
+    <form action="/user" method="post">
+        <input type="text" name="name" id="name" placeholder="Name">
+        <input type="text" name="user_name" id="email" placeholder="Username">
+        <input type="text" name="pass" id="email" placeholder="Password">
+        <button id="btn" type="submit" formaction="/user">Submit</button>
+    </form>
+    <hr>
+    <h2>Delete</h2>
+    <form method="POST" action="/delete">
+        <input type="text" name="idNum" id="idName" placeholder="Number of the ID">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit">Delete</button>
+    </form>
+    <hr>
+    <h2>Update</h2>
+    <form method="POST" action="/update">
+        <input type="text" name="idNum" id="idName" placeholder="Number of the ID">
+        <input type="text" name="name" placeholder="New Name">
+        <input type="text" name="username" placeholder="New Username">
+        <input type="text" name="password" placeholder="New Password">
+        <input type="hidden" name="_method" value="UPDATE">
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>
