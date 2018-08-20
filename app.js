@@ -7,6 +7,9 @@ const mysql = require('mysql');
 const router = express.Router();
 const myConnection = require('express-myconnection');
 const method = require('method-override');
+const bcrypt = require('bcrypt-nodejs');
+const { check, validationResult } = require('express-validator/check');
+const saltRounds = 10;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : false }));
@@ -17,7 +20,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '<YOUR-PASSWORD>',
-    database: '<YOUR-DATABASE-NAME'
+    database: '<YOUR-DATABASE>'
 });
 
 // connects the database
@@ -40,11 +43,18 @@ app.get('/user', (req, res) => {
 
 // add user
 app.post('/user', (req, res) => {
-    const data = req.body;
-    connection.query('INSERT INTO users set ?', [data], (err, results, fields) => {
+    const name = req.body.name;
+    const username = req.body.user_name;
+    bcrypt.genSalt(10, (err, salt) => {
         if (err) throw err;
-        console.log(req.body);
-        res.redirect('/');
+        bcrypt.hash(req.body.pass, salt, null, (err, hash) => {
+            connection.query(`INSERT INTO users (name, user_name, pass) 
+            VALUES ('${name}', '${username}', '${req.body.pass = hash}')`, (err, results, fields) => {
+                if (err) throw err;
+                console.log(req.body.pass);
+                res.redirect('/');
+            });
+        });
     });
 });
 
@@ -66,18 +76,41 @@ app.post('/update', (req, res) => {
     let data;
     let newName;
     let user;
-    let pass;
     if ('_method' in req.body) {
         data = req.body.idNum;
         newName = req.body.name;
         user = req.body.username;
-        pass = req.body.password;
     }
-    connection.query(`UPDATE users SET name = '${newName}', user_name = '${user}',
-    pass = '${pass}' WHERE id = ${data}`, (err, results, fields) => {
+    bcrypt.genSalt(10, (err, salt) => {
         if (err) throw err;
-        console.log(`Updated all parameters of ID: ${data}`);
-        res.redirect('/');
+        bcrypt.hash(req.body.password, salt, null, (err, hash) => {
+            connection.query(`UPDATE users SET name = '${newName}', user_name = '${user}',
+            pass = '${req.body.password = hash}' WHERE id = ${data}`, (err, results, fields) => {
+                if (err) throw err;
+                console.log(`Updated all parameters of ID: ${data}`);
+                res.redirect('/');
+            });
+        });
+    });
+});
+
+// login
+app.post('/login', (req, res) => {
+    let pass;
+    let username;
+    let userPass;
+    if ('_method' in req.body) {
+        pass = req.body.password; 
+        username = req.body.username;
+    }
+    connection.query(`SELECT pass FROM users WHERE user_name = '${username}'`, (err, results, fields) => {
+        if (err) throw err;
+        userPass = results[0].pass;
+        bcrypt.compare(pass, userPass , (err, result) => {
+            if (err) throw err;
+            console.log(result);
+            res.redirect('/');
+        });
     });
 });
 
